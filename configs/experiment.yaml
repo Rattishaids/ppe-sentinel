@@ -1,0 +1,55 @@
+﻿# PPE-Sentinel training experiment registry
+#
+# Baseline established:
+# RT-DETR-L
+# 640x640
+# batch 4
+# 50 epochs
+#
+# The experiments below are hypotheses, not guaranteed improvements.
+
+baseline:
+  model: rtdetr-l.pt
+  imgsz: 640
+  batch: 4
+  epochs: 50
+  optimizer: auto
+  lr0: null
+  lrf: null
+  weight_decay: null
+
+high_resolution_probe:
+  model: rtdetr-l.pt
+  imgsz: 896
+  batch: 2
+  epochs: 10
+  optimizer: auto
+  lr0: null
+  lrf: null
+  weight_decay: null
+
+high_resolution_full:
+  model: rtdetr-l.pt
+  imgsz: 896
+  batch: 2
+  epochs: 75
+  optimizer: auto
+  lr0: null
+  lrf: null
+  weight_decay: null
+
+high_resolution_targeted:
+  model: rtdetr-l.pt
+  imgsz: 896
+  batch: 2
+  epochs: 75
+  optimizer: auto
+  lr0: null
+  lrf: null
+  weight_decay: null
+  mosaic: 0.5
+  scale: 0.3
+  translate: 0.1
+  hsv_h: 0.015
+  hsv_s: 0.7
+  hsv_v: 0.4

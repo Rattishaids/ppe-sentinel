@@ -1,0 +1,72 @@
+{
+  "seed": 0,
+  "training_images": 6479,
+  "class_weights": {
+    "helmet": 1.75,
+    "gloves": 1.35,
+    "safety-vest": 2.5
+  },
+  "image_level_counts": {
+    "hands": 5171,
+    "helmet": 373,
+    "person": 6102,
+    "safety-suit": 113,
+    "shoes": 1250,
+    "tools": 1802,
+    "ear": 3897,
+    "face": 4491,
+    "head": 5181,
+    "gloves": 1067,
+    "safety-vest": 168,
+    "glasses": 1265,
+    "face-mask-medical": 320,
+    "ear-mufs": 185,
+    "face-guard": 104,
+    "foot": 283,
+    "medical-suit": 84
+  },
+  "instance_counts": {
+    "hands": 12638,
+    "shoes": 3604,
+    "safety-suit": 195,
+    "helmet": 773,
+    "person": 11068,
+    "tools": 3724,
+    "head": 9558,
+    "face": 7095,
+    "ear": 6118,
+    "gloves": 2261,
+    "safety-vest": 433,
+    "glasses": 1547,
+    "face-mask-medical": 519,
+    "ear-mufs": 269,
+    "face-guard": 110,
+    "foot": 610,
+    "medical-suit": 114
+  },
+  "ppe_exposure": {
+    "gloves": {
+      "original_images": 1067,
+      "sampled_exposures": 1447,
+      "original_fraction": 0.16468590831918506,
+      "sampled_fraction": 0.22333693471214694,
+      "exposure_multiplier": 1.3561387066541706
+    },
+    "helmet": {
+      "original_images": 373,
+      "sampled_exposures": 695,
+      "original_fraction": 0.057570612748881,
+      "sampled_fraction": 0.10726964037660133,
+      "exposure_multiplier": 1.8632707774798927
+    },
+    "safety-vest": {
+      "original_images": 168,
+      "sampled_exposures": 397,
+      "original_fraction": 0.02592992745794104,
+      "sampled_fraction": 0.06127488810001543,
+      "exposure_multiplier": 2.363095238095238
+    }
+  },
+  "sampling_method": "weighted_with_replacement",
+  "effective_epoch_size": 6479
+}

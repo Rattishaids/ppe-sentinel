@@ -1,0 +1,385 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPE-Sentinel | Industrial Safety Intelligence</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<div class="app-shell">
+
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-mark">PS</div>
+            <div>
+                <div class="brand-name">PPE-SENTINEL</div>
+                <div class="brand-subtitle">Evidence-Grounded Industrial Safety Intelligence</div>
+            </div>
+        </div>
+
+        <div class="system-status">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">CHECKING API</span>
+            <span class="api-label">FASTAPI</span>
+        </div>
+    </header>
+
+
+    <main>
+
+        <!-- HERO -->
+        <section class="hero">
+            <div class="hero-copy">
+                <div class="eyebrow">COMPUTER VISION · PPE COMPLIANCE · EVIDENCE REASONING</div>
+
+                <h1>
+                    Detect workers.<br>
+                    <span>Reason from evidence.</span>
+                </h1>
+
+                <p>
+                    RT-DETR detection combined with worker-level spatial association
+                    and an explicit uncertainty guardrail.
+                </p>
+
+                <div class="hero-principle">
+                    <span class="principle-mark">◆</span>
+                    <span>Uncertainty is reported — never hidden.</span>
+                </div>
+            </div>
+
+            <div class="architecture-mini">
+                <div class="arch-title">DECISION PIPELINE</div>
+
+                <div class="arch-step">
+                    <span>01</span>
+                    <b>RT-DETR</b>
+                    <small>OBJECT DETECTION</small>
+                </div>
+
+                <div class="arch-line"></div>
+
+                <div class="arch-step">
+                    <span>02</span>
+                    <b>ASSOCIATION</b>
+                    <small>WORKER ↔ PPE</small>
+                </div>
+
+                <div class="arch-line"></div>
+
+                <div class="arch-step">
+                    <span>03</span>
+                    <b>EVIDENCE GATE</b>
+                    <small>PRESENT / ABSENT / UNKNOWN</small>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- WORKSPACE -->
+        <section class="workspace">
+
+            <!-- IMAGE PANEL -->
+            <div class="panel image-panel">
+
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-kicker">VISUAL INPUT</div>
+                        <h2>Inspection Image</h2>
+                    </div>
+
+                    <button class="secondary-btn" id="clearBtn">
+                        CLEAR
+                    </button>
+                </div>
+
+                <div class="upload-zone" id="uploadZone">
+
+                    <input
+                        type="file"
+                        id="imageInput"
+                        accept="image/*"
+                        hidden
+                    >
+
+                    <div class="upload-content" id="uploadContent">
+                        <div class="upload-icon">↑</div>
+
+                        <h3>Drop inspection image here</h3>
+
+                        <p>
+                            or
+                            <button class="browse-btn" id="browseBtn">
+                                browse files
+                            </button>
+                        </p>
+
+                        <span class="upload-note">
+                            JPG / PNG · Local inference · No image leaves this machine
+                        </span>
+                    </div>
+
+                    <div class="canvas-wrapper hidden" id="canvasWrapper">
+                        <canvas id="detectionCanvas"></canvas>
+                    </div>
+
+                </div>
+
+                <div class="image-meta hidden" id="imageMeta">
+                    <span id="imageName">—</span>
+                    <span id="imageDimensions">—</span>
+                </div>
+
+            </div>
+
+
+            <!-- SAFETY OVERVIEW -->
+            <div class="panel overview-panel">
+
+                <div class="panel-kicker">SAFETY OVERVIEW</div>
+                <h2>Evidence Summary</h2>
+
+                <div class="stat-grid">
+
+                    <div class="stat-card">
+                        <span class="stat-label">WORKERS</span>
+                        <strong id="workerCount">—</strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <span class="stat-label">DETECTIONS</span>
+                        <strong id="detectionCount">—</strong>
+                    </div>
+
+                </div>
+
+                <div class="ppe-summary">
+
+                    <div class="ppe-row">
+                        <div class="ppe-icon">H</div>
+                        <div class="ppe-info">
+                            <span>Helmet</span>
+                            <small id="helmetSummary">Awaiting image</small>
+                        </div>
+                        <span class="state-badge neutral" id="helmetState">—</span>
+                    </div>
+
+                    <div class="ppe-row">
+                        <div class="ppe-icon">V</div>
+                        <div class="ppe-info">
+                            <span>Safety Vest</span>
+                            <small id="vestSummary">Awaiting image</small>
+                        </div>
+                        <span class="state-badge neutral" id="vestState">—</span>
+                    </div>
+
+                    <div class="ppe-row">
+                        <div class="ppe-icon">G</div>
+                        <div class="ppe-info">
+                            <span>Gloves</span>
+                            <small id="glovesSummary">Awaiting image</small>
+                        </div>
+                        <span class="state-badge neutral" id="glovesState">—</span>
+                    </div>
+
+                </div>
+
+                <div class="evidence-note">
+                    <div class="note-icon">i</div>
+                    <div>
+                        <b>Evidence policy</b>
+                        <p>
+                            Missing PPE detections are not automatically treated as violations.
+                            Body-region visibility and spatial association determine whether
+                            evidence is sufficient.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ASK IMAGE -->
+        <section class="panel reasoning-panel">
+
+            <div class="panel-header reasoning-header">
+
+                <div>
+                    <div class="panel-kicker">NATURAL-LANGUAGE REASONING</div>
+                    <h2>Ask the Image</h2>
+                    <p class="section-description">
+                        Questions are routed through a hand-written intent layer and answered
+                        from structured visual evidence.
+                    </p>
+                </div>
+
+                <div class="intent-chip">
+                    HAND-WRITTEN ROUTER
+                </div>
+
+            </div>
+
+
+            <div class="question-area">
+
+                <div class="question-input-wrap">
+                    <input
+                        id="questionInput"
+                        type="text"
+                        placeholder="e.g. Are the workers wearing gloves?"
+                        autocomplete="off"
+                    >
+
+                    <button id="askBtn" class="primary-btn">
+                        ANALYZE →
+                    </button>
+                </div>
+
+                <div class="quick-questions">
+                    <span>TRY:</span>
+
+                    <button class="question-chip"
+                        data-question="Are the workers wearing helmets?">
+                        Helmet compliance
+                    </button>
+
+                    <button class="question-chip"
+                        data-question="Are the workers wearing safety vests?">
+                        Vest compliance
+                    </button>
+
+                    <button class="question-chip"
+                        data-question="Are the workers wearing gloves?">
+                        Glove compliance
+                    </button>
+
+                    <button class="question-chip"
+                        data-question="How many workers are visible?">
+                        Worker count
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- RESULT -->
+            <div class="reasoning-result hidden" id="reasoningResult">
+
+                <div class="result-top">
+
+                    <div>
+                        <div class="result-kicker">REASONING RESULT</div>
+                        <div class="result-status" id="resultStatus">—</div>
+                    </div>
+
+                    <div class="result-confidence">
+                        <span>CONFIDENCE</span>
+                        <strong id="resultConfidence">—</strong>
+                    </div>
+
+                </div>
+
+                <div class="answer-box">
+                    <span class="answer-label">SYSTEM ANSWER</span>
+                    <p id="answerText">—</p>
+                </div>
+
+                <div class="worker-results" id="workerResults"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- EVIDENCE GRAPH -->
+        <section class="panel evidence-panel">
+
+            <div class="panel-kicker">TRACEABLE DECISION</div>
+            <h2>Evidence Chain</h2>
+
+            <p class="section-description">
+                Every PPE decision is tied to a spatial evidence path rather than
+                an unexplained language-model judgment.
+            </p>
+
+            <div class="evidence-graph" id="evidenceGraph">
+
+                <div class="graph-empty">
+                    Upload an image and run an analysis to inspect the evidence graph.
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- DETECTIONS -->
+        <section class="panel detections-panel">
+
+            <div class="panel-header">
+                <div>
+                    <div class="panel-kicker">MODEL OUTPUT</div>
+                    <h2>Raw Detections</h2>
+                </div>
+
+                <span class="count-label" id="tableCount">0 objects</span>
+            </div>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>CLASS</th>
+                            <th>CONFIDENCE</th>
+                            <th>BOUNDING BOX</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="detectionTable">
+                        <tr>
+                            <td colspan="4" class="empty-table">
+                                No detections yet.
+                            </td>
+                        </tr>
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- FOOTER -->
+        <footer>
+
+            <div>
+                <b>PPE-SENTINEL</b>
+                <span>RT-DETR-L · SH17 · Deterministic Evidence Reasoning</span>
+            </div>
+
+            <div class="footer-links">
+                <a href="http://127.0.0.1:8000/docs" target="_blank">
+                    API DOCS ↗
+                </a>
+            </div>
+
+        </footer>
+
+    </main>
+
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
