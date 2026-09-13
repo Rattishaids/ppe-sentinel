@@ -13,6 +13,8 @@ from fastapi import (
 )
 
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from inference.detector import PPEDetector
 from inference.pipeline import run_pipeline
@@ -26,6 +28,8 @@ MODEL_PATH = (
     / "models"
     / "ppe_sentinel_rtdetr_l_best.pt"
 )
+
+FRONTEND_PATH = ROOT / "frontend"
 
 
 app = FastAPI(
@@ -94,31 +98,23 @@ def cleanup(
 ) -> None:
 
     try:
-        path.unlink(
-            missing_ok=True
-        )
+        path.unlink(missing_ok=True)
     except Exception:
         pass
 
 
-@app.get(
-    "/health",
-)
+@app.get("/health")
 def health() -> dict[str, Any]:
 
     return {
         "status": "ok",
         "service": "ppe-sentinel",
-        "model": str(
-            MODEL_PATH
-        ),
+        "model": str(MODEL_PATH),
         "model_exists": MODEL_PATH.exists(),
     }
 
 
-@app.post(
-    "/detect",
-)
+@app.post("/detect")
 async def detect(
     image: UploadFile = File(...),
 ) -> dict[str, Any]:
@@ -129,9 +125,7 @@ async def detect(
             detail="Missing content type.",
         )
 
-    if not image.content_type.startswith(
-        "image/"
-    ):
+    if not image.content_type.startswith("image/"):
         raise HTTPException(
             status_code=400,
             detail="Only image uploads are supported.",
@@ -139,9 +133,7 @@ async def detect(
 
     data = await image.read()
 
-    validate_image_bytes(
-        data
-    )
+    validate_image_bytes(data)
 
     suffix = Path(
         image.filename or "image.jpg"
@@ -150,27 +142,20 @@ async def detect(
     if not suffix:
         suffix = ".jpg"
 
-    temp_path = save_upload(
-        data,
-        suffix,
-    )
+    temp_path = save_upload(data, suffix)
 
     try:
 
         detector = PPEDetector()
 
-        detections = detector.predict(
-            temp_path
-        )
+        detections = detector.predict(temp_path)
 
         return {
             "success": True,
             "filename": image.filename,
             "model": "RT-DETR-L",
             "image_size": 640,
-            "detection_count": len(
-                detections
-            ),
+            "detection_count": len(detections),
             "detections": detections,
         }
 
@@ -185,21 +170,15 @@ async def detect(
 
         raise HTTPException(
             status_code=500,
-            detail=(
-                f"Detection failed: {exc}"
-            ),
+            detail=f"Detection failed: {exc}",
         )
 
     finally:
 
-        cleanup(
-            temp_path
-        )
+        cleanup(temp_path)
 
 
-@app.post(
-    "/reason",
-)
+@app.post("/reason")
 async def reason_image(
     image: UploadFile = File(...),
     question: str = Form(...),
@@ -208,40 +187,26 @@ async def reason_image(
     question = question.strip()
 
     if not question:
-
         raise HTTPException(
             status_code=400,
             detail="Question cannot be empty.",
         )
 
     if not image.content_type:
-
         raise HTTPException(
             status_code=400,
             detail="Missing content type.",
         )
 
-    if not image.content_type.startswith(
-        "image/"
-    ):
-
+    if not image.content_type.startswith("image/"):
         raise HTTPException(
             status_code=400,
             detail="Only image uploads are supported.",
         )
 
-    # ------------------------------------------------------------
-    # HAND-WRITTEN INTENT ROUTING
-    # ------------------------------------------------------------
+    intent = detect_intent(question)
 
-    intent = detect_intent(
-        question
-    )
-
-    # Non-visual questions do not invoke the detector.
-    if not intent[
-        "requires_detection"
-    ]:
+    if not intent["requires_detection"]:
 
         return {
             "success": True,
@@ -249,9 +214,7 @@ async def reason_image(
             "intent": intent,
             "detection_used": False,
             "reasoning": {
-                "status": (
-                    "INSUFFICIENT_INFORMATION"
-                ),
+                "status": "INSUFFICIENT_INFORMATION",
                 "answer": (
                     "I cannot answer that question "
                     "using the available visual detection evidence."
@@ -262,9 +225,7 @@ async def reason_image(
 
     data = await image.read()
 
-    validate_image_bytes(
-        data
-    )
+    validate_image_bytes(data)
 
     suffix = Path(
         image.filename or "image.jpg"
@@ -273,10 +234,7 @@ async def reason_image(
     if not suffix:
         suffix = ".jpg"
 
-    temp_path = save_upload(
-        data,
-        suffix,
-    )
+    temp_path = save_upload(data, suffix)
 
     try:
 
@@ -288,9 +246,7 @@ async def reason_image(
         return {
             "success": True,
             "question": question,
-            "intent": result[
-                "reasoning"
-            ].get(
+            "intent": result["reasoning"].get(
                 "intent",
                 intent,
             ),
@@ -301,15 +257,9 @@ async def reason_image(
             "worker_count": len(
                 result["workers"]
             ),
-            "detections": result[
-                "detections"
-            ],
-            "workers": result[
-                "workers"
-            ],
-            "reasoning": result[
-                "reasoning"
-            ],
+            "detections": result["detections"],
+            "workers": result["workers"],
+            "reasoning": result["reasoning"],
         }
 
     except FileNotFoundError as exc:
@@ -323,20 +273,21 @@ async def reason_image(
 
         raise HTTPException(
             status_code=500,
-            detail=(
-                f"Reasoning failed: {exc}"
-            ),
+            detail=f"Reasoning failed: {exc}",
         )
 
     finally:
 
-        cleanup(
-            temp_path
-        )
+        cleanup(temp_path)
 
 
 @app.get("/")
 def root():
+
+    index_path = FRONTEND_PATH / "index.html"
+
+    if index_path.exists():
+        return FileResponse(index_path)
 
     return {
         "service": "PPE-Sentinel",
@@ -350,3 +301,12 @@ def root():
             "/reason",
         ],
     }
+
+
+app.mount(
+    "/",
+    StaticFiles(
+        directory=FRONTEND_PATH,
+    ),
+    name="frontend",
+)
