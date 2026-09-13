@@ -315,6 +315,10 @@ A future version should evaluate a separately sourced and annotated construction
 
 # 🏗️ System Architecture
 
+
+<img width="1536" height="1024" alt="ChatGPT Image Sep 13, 2026, 05_31_47 PM" src="https://github.com/user-attachments/assets/7261bac3-3ba2-4e89-b7c0-0fa87e006336" />
+
+
 ```mermaid
 flowchart TD
 
